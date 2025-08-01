@@ -1,0 +1,13 @@
+// List of trigger objects
+[
+// Each trigger object consists of a trigger phrase and a payload template
+{
+"trigger": "order supplies",
+"payload": {
+"source": "NomiAI",
+"action_needed": "Order Supplies",
+"message": "{response}", // Nomi response that triggered this action
+"user_phone": "{sender_number}" // Phone number of the user who sent the original message
+}
+}
+]

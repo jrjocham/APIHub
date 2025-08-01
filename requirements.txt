@@ -1,0 +1,13 @@
+# Web server and API dependencies
+Flask
+requests
+twilio
+
+# Environment variable management
+python-dotenv
+
+# Data validation
+jsonschema
+
+# You don't need to list the standard logging library here,
+# as it's built into Python.
