@@ -6,6 +6,7 @@ twilio
 # Environment variable management
 python-dotenv
 
+gunicorn
 # Data validation
 jsonschema
 
