@@ -29,10 +29,6 @@ def health_check():
 @app.route("/whatsapp", methods=['POST'])
 @handle_api_errors
 def whatsapp_webhook():
-    """
-    This endpoint receives messages from WhatsApp via Twilio,
-    routes them to the correct Nomi, and sends the response back.
-    """
     # Get the incoming message
     incoming_message = request.values.get('Body', '').strip()
     from_number = request.values.get('From', '')
@@ -87,18 +83,15 @@ def send_to_nomi(nomi_id: str, message: str) -> str:
     }
 
     response = requests.post(api_url, headers=headers, json=data)
-    response.raise_for_status()  # This will raise an HTTPError for bad responses (4xx or 5xx)
+    response.raise_for_status()
     
     response_data = response.json()
     
-    # The Nomi API documentation suggests the response is under a 'message' key.
     nomi_message = response_data.get('message', 'No response from Nomi.')
     
     logger.info(f"Received response from Nomi {nomi_id}: {nomi_message}")
     
     return nomi_message
 
-# Main entry point to run the Flask app
 if __name__ == '__main__':
-    # When running on a Raspberry Pi, you might need to adjust the host
     app.run(host='0.0.0.0', port=5000, debug=True)
