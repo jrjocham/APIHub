@@ -7,8 +7,6 @@ load_dotenv('keys.env')
 class Credentials:
     """
     A class to centralize and manage all API credentials.
-    This helps in keeping sensitive information organized and
-    separate from the main codebase.
     """
     def __init__(self):
         # Nomi.ai API credentials
@@ -32,7 +30,7 @@ class Credentials:
         self.discord_api_key = os.getenv("DISCORD_API_KEY")
         self.anydesk_api_key = os.getenv("ANYDESK_API_KEY")
         self.zapier_api_key = os.getenv("ZAPIER_API_KEY")
-
+        
 # Create an instance of the Credentials class to be imported
 # and used by other modules.
 creds = Credentials()

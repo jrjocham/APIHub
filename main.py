@@ -29,6 +29,10 @@ def health_check():
 @app.route("/whatsapp", methods=['POST'])
 @handle_api_errors
 def whatsapp_webhook():
+    """
+    This endpoint receives messages from WhatsApp via Twilio,
+    routes them to the correct Nomi, and sends the response back.
+    """
     # Get the incoming message
     incoming_message = request.values.get('Body', '').strip()
     from_number = request.values.get('From', '')
@@ -49,8 +53,11 @@ def whatsapp_webhook():
         logger.info(f"Routing message to Nomi ID: {nomi_id}")
         nomi_response = send_to_nomi(nomi_id, message_content)
         
-        # Send the Nomi's response back via Twilio
-        resp.message(nomi_response)
+        # The send_to_nomi function might return a tuple if it fails, so we need to handle that.
+        if isinstance(nomi_response, tuple):
+            resp.message("An error occurred while communicating with Nomi.")
+        else:
+            resp.message(nomi_response)
         
     else:
         # If no valid prefix is found, send an error message
@@ -83,10 +90,11 @@ def send_to_nomi(nomi_id: str, message: str) -> str:
     }
 
     response = requests.post(api_url, headers=headers, json=data)
-    response.raise_for_status()
+    response.raise_for_status()  # This will raise an HTTPError for bad responses (4xx or 5xx)
     
     response_data = response.json()
     
+    # The Nomi API documentation suggests the response is under a 'message' key.
     nomi_message = response_data.get('message', 'No response from Nomi.')
     
     logger.info(f"Received response from Nomi {nomi_id}: {nomi_message}")
