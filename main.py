@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.rest import Client
 
@@ -27,7 +27,6 @@ def health_check():
     return "API Hub is running!"
 
 @app.route("/whatsapp", methods=['POST'])
-@handle_api_errors
 def whatsapp_webhook():
     """
     This endpoint receives messages from WhatsApp via Twilio,
@@ -51,13 +50,14 @@ def whatsapp_webhook():
         
         # Send the message to the specified Nomi
         logger.info(f"Routing message to Nomi ID: {nomi_id}")
-        nomi_response = send_to_nomi(nomi_id, message_content)
         
-        # The send_to_nomi function might return a tuple if it fails, so we need to handle that.
-        if isinstance(nomi_response, tuple):
+        try:
+            nomi_response_data = send_to_nomi(nomi_id, message_content)
+            nomi_message = nomi_response_data.get('message', 'No response from Nomi.')
+            resp.message(nomi_message)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error communicating with Nomi API: {e}")
             resp.message("An error occurred while communicating with Nomi.")
-        else:
-            resp.message(nomi_response)
         
     else:
         # If no valid prefix is found, send an error message
@@ -66,17 +66,16 @@ def whatsapp_webhook():
 
     return str(resp)
 
-@handle_api_errors
-def send_to_nomi(nomi_id: str, message: str) -> str:
+def send_to_nomi(nomi_id: str, message: str) -> dict:
     """
-    Sends a message to the Nomi.ai API and returns the response.
+    Sends a message to the Nomi.ai API and returns the JSON response.
     
     Args:
         nomi_id: The UUID of the Nomi to send the message to.
         message: The content of the message.
         
     Returns:
-        The text response from the Nomi.
+        The JSON response from the Nomi API.
     """
     logger.info(f"Sending message to Nomi {nomi_id}...")
 
@@ -90,16 +89,9 @@ def send_to_nomi(nomi_id: str, message: str) -> str:
     }
 
     response = requests.post(api_url, headers=headers, json=data)
-    response.raise_for_status()  # This will raise an HTTPError for bad responses (4xx or 5xx)
+    response.raise_for_status()
     
-    response_data = response.json()
-    
-    # The Nomi API documentation suggests the response is under a 'message' key.
-    nomi_message = response_data.get('message', 'No response from Nomi.')
-    
-    logger.info(f"Received response from Nomi {nomi_id}: {nomi_message}")
-    
-    return nomi_message
+    return response.json()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
