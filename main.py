@@ -80,13 +80,12 @@ def send_to_nomi(nomi_id: str, message: str) -> dict:
     """
     logger.info(f"Sending message to Nomi {nomi_id}...")
 
-    api_url = f"https://api.nomi.ai/v1/message"
+    api_url = f"https://api.nomi.ai/v1/nomis/{nomi_id}/message"
     headers = {
         "Authorization": f"Bearer {creds.nomi_api_key}",
         "Content-Type": "application/json"
     }
     data = {
-        "nomi_id": nomi_id,
         "message": {
             "text": message
         }
