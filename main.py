@@ -85,13 +85,16 @@ def send_to_nomi(nomi_id: str, message: str) -> dict:
         "Content-Type": "application/json"
     }
     data = {
-        "message": message
+        "message": {
+            "text": message
+        }
     }
 
-    response = requests.post(api_url, headers=headers, json=data)
-    response.raise_for_status()
-    
-    return response.json()
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    try:
+        response = requests.post(api_url, headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error communicating with Nomi API: {e}")
+        # Re-raise the exception to be handled by the caller
+        raise e
