@@ -82,7 +82,7 @@ def send_to_nomi(nomi_id: str, message: str) -> dict:
 
     api_url = f"https://api.nomi.ai/v1/nomis/{nomi_id}/message"
     headers = {
-        "Authorization": f"{creds.nomi_api_key}",
+        "Authorization": f"Bearer {creds.nomi_api_key}",
         "Content-Type": "application/json"
     }
     data = {
