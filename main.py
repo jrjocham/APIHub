@@ -97,4 +97,5 @@ def send_to_nomi(nomi_id: str, message: str) -> dict:
         return response.json()
     except requests.exceptions.RequestException as e:
         logger.error(f"Error communicating with Nomi API: {e}")
+        # Re-raise the exception to be handled by the caller
         raise e
